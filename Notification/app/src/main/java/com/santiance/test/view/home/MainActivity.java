@@ -17,8 +17,9 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.santiance.test.R;
+import com.santiance.test.controllers.services.LocationService;
 import com.santiance.test.databinding.ActivityMainBinding;
-import com.santiance.test.receivers.ProximityIntentReceiver;
+import com.santiance.test.controllers.receivers.ProximityIntentReceiver;
 import com.santiance.test.view.map.MapsActivity;
 
 import java.text.DecimalFormat;
@@ -54,6 +55,12 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
+
+        //Starting service
+
+        Intent intent = new Intent(this, LocationService.class);
+        startService(intent);
+
 
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 

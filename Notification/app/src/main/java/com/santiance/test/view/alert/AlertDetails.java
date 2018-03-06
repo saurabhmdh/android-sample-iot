@@ -3,11 +3,13 @@ package com.santiance.test.view.alert;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
@@ -19,6 +21,8 @@ import com.santiance.test.view.home.MainActivity;
 public class AlertDetails extends AppCompatActivity implements ActivityCompat.OnRequestPermissionsResultCallback {
 
     private static final int PERMISSION_REQUEST_ACCESS_LOCATION = 0;
+    private static final String[] PERMISSIONS_LIST = new String[]{
+            Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,11 +32,10 @@ public class AlertDetails extends AppCompatActivity implements ActivityCompat.On
     }
 
     private void checkPermissions() {
-        if (ActivityCompat.checkSelfPermission(this,
-                Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+        if (checkPermission(Manifest.permission.ACCESS_FINE_LOCATION)
+                && checkPermission(Manifest.permission.ACCESS_COARSE_LOCATION)) {
             proceedToNextStep();
         } else {
-            // Permission is missing and must be requested.
             requestPermission();
         }
     }
@@ -44,7 +47,7 @@ public class AlertDetails extends AppCompatActivity implements ActivityCompat.On
     }
 
     private void requestPermission() {
-        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+        ActivityCompat.requestPermissions(this, PERMISSIONS_LIST,
                 PERMISSION_REQUEST_ACCESS_LOCATION);
     }
 
@@ -53,13 +56,28 @@ public class AlertDetails extends AppCompatActivity implements ActivityCompat.On
                                            @NonNull int[] grantResults) {
 
         if (requestCode == PERMISSION_REQUEST_ACCESS_LOCATION) {
-            // Request for camera permission.
-            if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                proceedToNextStep();
+            if (grantResults.length == PERMISSIONS_LIST.length) {
+                boolean allPermissionGranted = true;
+                for (int i =0; i < grantResults.length; ++i) {
+                    allPermissionGranted &= (grantResults[i] == PackageManager.PERMISSION_GRANTED);
+                }
+                if (allPermissionGranted) {
+                    proceedToNextStep();
+                } else {
+                    permissionsNotGranted();
+                }
             } else {
-                Toast.makeText(this, R.string.permission_denied_message, Toast.LENGTH_LONG).show();
-                finish();
+                permissionsNotGranted();
             }
         }
+    }
+
+    private boolean checkPermission(String permission) {
+        return ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+    }
+
+    private void permissionsNotGranted() {
+        Toast.makeText(this, R.string.permission_denied_message, Toast.LENGTH_LONG).show();
+        finish();
     }
 }
