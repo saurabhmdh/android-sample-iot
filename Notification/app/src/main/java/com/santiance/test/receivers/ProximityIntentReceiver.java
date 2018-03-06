@@ -8,9 +8,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.location.LocationManager;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.NotificationManagerCompat;
 import android.util.Log;
 
 import com.santiance.test.R;
+import com.santiance.test.view.alert.AlertDetails;
 
 /**
  * Created by saurabh.khare on 2018/03/05.
@@ -33,34 +36,20 @@ public class ProximityIntentReceiver extends BroadcastReceiver {
             Log.d(TAG, "exiting");
         }
 
-        NotificationManager notificationManager =
-                (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-
+//        Intent alertIntent = new Intent(context, AlertDetails.class);
+//        alertIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
 
-        Notification notification = createNotification();
-//        notification.setLatestEventInfo(context,
-//                "Proximity Alert!", "You are near your point of interest.", pendingIntent);
+        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context, "default")
+                .setSmallIcon(R.drawable.ic_notifications_black_24dp)
+                .setContentTitle(context.getString(android.R.string.dialog_alert_title))
+                .setContentText("Hello World!")
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                // Set the intent that will fire when the user taps the notification
+                .setContentIntent(pendingIntent)
+                .setAutoCancel(true);
 
-        notificationManager.notify(NOTIFICATION_ID, notification);
-    }
-
-    private Notification createNotification() {
-        Notification notification = new Notification();
-
-        notification.icon = R.drawable.ic_notifications_black_24dp;
-        notification.when = System.currentTimeMillis();
-
-        notification.flags |= Notification.FLAG_AUTO_CANCEL;
-        notification.flags |= Notification.FLAG_SHOW_LIGHTS;
-
-        notification.defaults |= Notification.DEFAULT_VIBRATE;
-        notification.defaults |= Notification.DEFAULT_LIGHTS;
-
-        notification.ledARGB = Color.WHITE;
-        notification.ledOnMS = 1500;
-        notification.ledOffMS = 1500;
-
-        return notification;
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
+        notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build());
     }
 }

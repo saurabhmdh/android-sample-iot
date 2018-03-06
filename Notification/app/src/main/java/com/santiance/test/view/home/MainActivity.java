@@ -37,8 +37,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String POINT_LATITUDE_KEY = "POINT_LATITUDE_KEY";
     private static final String POINT_LONGITUDE_KEY = "POINT_LONGITUDE_KEY";
 
-    private static final String PROX_ALERT_INTENT =
-            "com.javacodegeeks.android.lbs.ProximityAlert";
+    private static final String PROX_ALERT_INTENT = "com.santiance.test.proximity.alert";
 
     private static final NumberFormat nf = new DecimalFormat("##.########");
 
@@ -53,6 +52,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
 
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
@@ -113,8 +113,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
     private void populateCoordinatesFromLastKnownLocation() {
-        Location location =
-                locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+        Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
         if (location!=null) {
             latitudeEditText.setText(nf.format(location.getLatitude()));
             longitudeEditText.setText(nf.format(location.getLongitude()));

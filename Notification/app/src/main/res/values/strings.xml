@@ -1,4 +1,8 @@
 <resources>
     <string name="app_name">GeoLocationNotification</string>
     <string name="title_activity_maps">Map</string>
+    <string name="title_activity_alert_details">AlertDetails</string>
+    <string name="permission_location">Location permission required!</string>
+    <string name="permission_grant_message">Please grant permission</string>
+    <string name="permission_denied_message">Permission denied!</string>
 </resources>

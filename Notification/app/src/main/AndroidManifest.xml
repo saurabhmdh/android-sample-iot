@@ -10,11 +10,11 @@
     -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_MOCK_LOCATION"
+    <uses-permission
+        android:name="android.permission.ACCESS_MOCK_LOCATION"
         tools:ignore="MockLocation" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.VIBRATE" />
-
 
     <application
         android:allowBackup="true"
@@ -23,7 +23,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".view.home.MainActivity">
+        <activity android:name=".view.alert.AlertDetails">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -42,15 +42,21 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
 
-        <receiver android:name=".receivers.ProximityIntentReceiver" android:exported="true">
+        <receiver
+            android:name=".receivers.ProximityIntentReceiver"
+            android:exported="true">
             <intent-filter>
-                <action android:name="com.javacodegeeks.android.lbs.ProximityAlert">
-                </action>
+                <action android:name="com.santiance.test.proximity.alert"></action>
             </intent-filter>
         </receiver>
+
         <activity
             android:name=".view.map.MapsActivity"
-            android:label="@string/title_activity_maps"></activity>
+            android:label="@string/title_activity_maps" />
+        <activity
+            android:name=".view.home.MainActivity"
+            android:label="@string/title_activity_alert_details"
+            android:theme="@style/AppTheme.NoActionBar" />
     </application>
 
 </manifest>
