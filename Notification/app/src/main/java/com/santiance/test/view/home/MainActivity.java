@@ -39,6 +39,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String POINT_LONGITUDE_KEY = "POINT_LONGITUDE_KEY";
 
     private static final String PROX_ALERT_INTENT = "com.santiance.test.proximity.alert";
+    private static final String ACTION_LOCATION_SERVICE = "com.santiance.test.service.location";
 
     private static final NumberFormat nf = new DecimalFormat("##.########");
 
@@ -58,7 +59,8 @@ public class MainActivity extends AppCompatActivity {
 
         //Starting service
 
-        Intent intent = new Intent(this, LocationService.class);
+        Intent intent = new Intent(ACTION_LOCATION_SERVICE);
+        intent.setPackage(getPackageName());
         startService(intent);
 
 

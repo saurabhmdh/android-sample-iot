@@ -60,7 +60,25 @@
 
         <service
             android:name=".controllers.services.LocationService"
-            android:exported="false"></service>
+            android:exported="false"
+            android:enabled="true"
+            android:stopWithTask="false">
+            <intent-filter>
+                <action android:name="com.santiance.test.service.location" />
+            </intent-filter>
+        </service>
+
+        <receiver
+            android:name="com.santiance.test.controllers.receivers.LocationServiceRestartBroadcastReceiver"
+            android:enabled="true"
+            android:exported="true"
+            android:label="RestartServiceWhenStopped">
+            <intent-filter>
+                <action android:name="com.arvi.ActivityRecognition.RestartSensor"/>
+                <action android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+            </intent-filter>
+        </receiver>
+
     </application>
 
 </manifest>
