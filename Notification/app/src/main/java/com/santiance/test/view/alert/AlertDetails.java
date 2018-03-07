@@ -3,20 +3,14 @@ package com.santiance.test.view.alert;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
-import android.view.View;
 import android.widget.Toast;
-
 import com.santiance.test.R;
-import com.santiance.test.view.home.MainActivity;
+
+import com.santiance.test.view.map.MapsActivity;
 
 public class AlertDetails extends AppCompatActivity implements ActivityCompat.OnRequestPermissionsResultCallback {
 
@@ -41,7 +35,7 @@ public class AlertDetails extends AppCompatActivity implements ActivityCompat.On
     }
 
     private void proceedToNextStep() {
-        Intent intent = new Intent(this, MainActivity.class);
+        Intent intent = new Intent(this, MapsActivity.class);
         startActivity(intent);
         finish();
     }

@@ -5,6 +5,8 @@ import android.util.Log;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import timber.log.Timber;
+
 /**
  * Created by saurabh.khare on 2018/03/06.
  */
@@ -33,7 +35,7 @@ public class TimerCounter {
         timerTask = new TimerTask() {
             @Override
             public void run() {
-                Log.i("TimerCounter", "in timer ++++ " + (counter++));
+                Timber.i("Backend service running timer ++++ " + (counter++));
             }
         };
     }

@@ -4,33 +4,31 @@ import android.Manifest;
 import android.app.AlarmManager;
 import android.app.IntentService;
 import android.app.PendingIntent;
-import android.app.Service;
+
 import android.content.Intent;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.IBinder;
 import android.os.SystemClock;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.LocalBroadcastManager;
-import android.util.Log;
-import android.widget.Toast;
-
+import com.santiance.test.data.CacheManager;
+import com.santiance.test.data.DataManager;
 import com.santiance.test.util.Constants;
 import com.santiance.test.util.TimerCounter;
-import com.santiance.test.view.home.MainActivity;
+
+import timber.log.Timber;
 
 
-public class LocationService extends Service {
+public class LocationService extends IntentService {
     private static final String PROX_ALERT_INTENT = "com.santiance.test.proximity.alert";
-    private static final int TWO_MINUTES = 1000 * 60 * 2;
+    private static final int TIME_DELTA_MINUTES = 1000 * 60 * 2;
 
     private LocationManager locationManager;
     private LocationChangeListener listener;
@@ -40,6 +38,10 @@ public class LocationService extends Service {
     private static long MIN_LOCATION_DISTANCE = 100;
     private TimerCounter timerCounter; //To check my service is running or not..
     private int counter = 0;
+
+    public LocationService() {
+        super("LocationService");
+    }
 
     @Override
     public void onCreate() {
@@ -66,7 +68,7 @@ public class LocationService extends Service {
         }
         timerCounter.startTimer(counter);
 
-        Log.i("LocationService" , "onStartCommand");
+        Timber.i( "onStartCommand");
         return START_STICKY;
     }
 
@@ -74,6 +76,11 @@ public class LocationService extends Service {
     @Override
     public IBinder onBind(Intent intent) {
         return null;
+    }
+
+    @Override
+    protected void onHandleIntent(@Nullable Intent intent) {
+        Timber.i("onHandled Intent");
     }
 
     protected boolean isBetterLocation(Location location, Location currentBestLocation) {
@@ -84,8 +91,8 @@ public class LocationService extends Service {
 
         // Check whether the new location fix is newer or older
         long timeDelta = location.getTime() - currentBestLocation.getTime();
-        boolean isSignificantlyNewer = timeDelta > TWO_MINUTES;
-        boolean isSignificantlyOlder = timeDelta < -TWO_MINUTES;
+        boolean isSignificantlyNewer = timeDelta > TIME_DELTA_MINUTES;
+        boolean isSignificantlyOlder = timeDelta < -TIME_DELTA_MINUTES;
         boolean isNewer = timeDelta > 0;
 
         // If it's been more than two minutes since the current location, use the new location
@@ -133,7 +140,7 @@ public class LocationService extends Service {
     @Override
     public void onDestroy() {
         // handler.removeCallbacks(sendUpdatesToUI);
-        Log.i("LocationService", "onDestroy called hence restart needed");
+        Timber.i("onDestroy called hence restart needed");
         Intent broadcastIntent = new Intent("com.santiance.test.service.location");
         LocalBroadcastManager.getInstance(this).sendBroadcast(broadcastIntent);
         sendBroadcast(broadcastIntent);
@@ -143,7 +150,7 @@ public class LocationService extends Service {
 
     @Override
     public void onTaskRemoved(Intent rootIntent) {
-        Log.i("LocationService", "onTaskRemoved called..");
+        Timber.i("onTaskRemoved called..");
         Intent intent = new Intent(getApplicationContext(), LocationService.class);
         PendingIntent pendingIntent = PendingIntent.getService(this, 1, intent, PendingIntent.FLAG_ONE_SHOT);
         AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
@@ -153,27 +160,43 @@ public class LocationService extends Service {
 
     public class LocationChangeListener implements LocationListener {
 
-        public void onLocationChanged(final Location loc) {
-            Log.i("LocationService", "Location changed");
-            if (isBetterLocation(loc, previousBestLocation)) {
-                Intent intent = new Intent(PROX_ALERT_INTENT);
-                intent.putExtra("Latitude", loc.getLatitude());
-                intent.putExtra("Longitude", loc.getLongitude());
-                intent.putExtra("Provider", loc.getProvider());
-                sendBroadcast(intent);
-//                LocationHelper.sendLocation(loc.getLatitude(), loc.getLongitude(),
-//                        new MyPreferenceManager(App.context).getAuthToken());
-                Log.i("LocationService", "Location : " + loc.getLatitude() + ":" + loc.getLongitude());
+        public void onLocationChanged(final Location currentLocation) {
+            Timber.i("Location changed");
+            if (isBetterLocation(currentLocation, previousBestLocation)) {
+
+                //Check if its in range or out of range
+                Location savedLocation = CacheManager.getInstance().get(Constants.CACHE_LOCATION, Location.class);
+                Float distance = currentLocation.distanceTo(savedLocation); //Approx on meter
+                Float savedRadius = CacheManager.getInstance().get(Constants.POINT_RANGE_KEY, Float.class);
+
+                Timber.i("Saved location: Latitude = " + savedLocation.getLatitude() + " Longitude = " + savedLocation.getLongitude());
+                Timber.i("Current location: Latitude = " + currentLocation.getLatitude() + " Longitude = " + currentLocation.getLongitude());
+
+                Timber.i("Distance between saved point & current " + distance);
+                Timber.i("Saved radius " + savedRadius);
+
+                if (distance.compareTo(savedRadius) > 0) { //Out of range
+                    Boolean inRange = CacheManager.getInstance().get(Constants.PREF_IN_RANGE, Boolean.class);
+                    if (inRange) {
+                        updateCheckInProcess(false);
+                    }
+                } else { //in Range
+                    Boolean inRange = CacheManager.getInstance().get(Constants.PREF_IN_RANGE, Boolean.class);
+                    if (!inRange) {
+                        updateCheckInProcess(true);
+                    }
+                }
+
             }
         }
 
         public void onProviderDisabled(String provider) {
-            Toast.makeText(getApplicationContext(), "Gps Disabled", Toast.LENGTH_SHORT).show();
+            Timber.i("GPS disabled");
         }
 
 
         public void onProviderEnabled(String provider) {
-            Toast.makeText(getApplicationContext(), "Gps Enabled", Toast.LENGTH_SHORT).show();
+            Timber.i("GPS enabled");
         }
 
 
@@ -198,23 +221,27 @@ public class LocationService extends Service {
     @Override
     public void onLowMemory() {
         super.onLowMemory();
-        Log.i("LocationService", "onLowMemory()");
+        Timber.i( "onLowMemory()");
     }
 
-//    public void onLocationChanged(Location location) {
-//        Location pointLocation = retrievelocationFromPreferences();
-//        float distance = location.distanceTo(pointLocation);
-//        Toast.makeText(MainActivity.this,
-//                "Distance from Point:"+distance, Toast.LENGTH_LONG).show();
-//    }
+    public void updateCheckInProcess(boolean status) {
+        //Update Cache
+        CacheManager.getInstance().put(Constants.PREF_IN_RANGE, status, Boolean.class);
+        //Change inRange value to out of range
+        DataManager.getInstance().saveInRangeInformation(getApplicationContext(), status);
+        //send notification
+        sendNotificationIntent(status);
 
-    private Location retrievelocationFromPreferences() {
-        SharedPreferences prefs = this.getSharedPreferences(getClass().getSimpleName(),
-                        Context.MODE_PRIVATE);
-        Location location = new Location("POINT_LOCATION");
-        location.setLatitude(prefs.getFloat(Constants.POINT_LATITUDE_KEY, 0));
-        location.setLongitude(prefs.getFloat(Constants.POINT_LONGITUDE_KEY, 0));
-        return location;
+        Timber.i("Checkin process done !!!");
     }
+
+    public void sendNotificationIntent(boolean inRange) {
+        Intent intent = new Intent(PROX_ALERT_INTENT);
+        Bundle extraData = new Bundle();
+        extraData.putBoolean(Constants.BUNDLE_IN_RANGE, inRange);
+        intent.putExtras(extraData);
+        sendBroadcast(intent);
+    }
+
 }
 

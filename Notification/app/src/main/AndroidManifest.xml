@@ -22,11 +22,11 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
+        android:name=".SantianceApp"
         android:theme="@style/AppTheme">
         <activity android:name=".view.alert.AlertDetails">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -43,7 +43,7 @@
             android:value="@string/google_maps_key" />
 
         <receiver
-            android:name=".controllers.receivers.ProximityIntentReceiver"
+            android:name=".controllers.receivers.NotificationIntentReceiver"
             android:exported="true">
             <intent-filter>
                 <action android:name="com.santiance.test.proximity.alert" />
@@ -53,10 +53,6 @@
         <activity
             android:name=".view.map.MapsActivity"
             android:label="@string/title_activity_maps" />
-        <activity
-            android:name=".view.home.MainActivity"
-            android:label="@string/title_activity_alert_details"
-            android:theme="@style/AppTheme.NoActionBar" />
 
         <service
             android:name=".controllers.services.LocationService"

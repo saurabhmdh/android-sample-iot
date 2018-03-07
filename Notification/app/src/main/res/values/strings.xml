@@ -5,4 +5,7 @@
     <string name="permission_location">Location permission required!</string>
     <string name="permission_grant_message">Please grant permission</string>
     <string name="permission_denied_message">Permission denied!</string>
+
+    <string name="check_in">Check in to your favorite place </string>
+    <string name="check_out">Check out to your favorite place </string>
 </resources>
